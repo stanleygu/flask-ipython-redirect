@@ -17,15 +17,15 @@ kirichoi@uw.edu
 
 This module will convert hex string back to its original zip file and uncompress them within the same folder.\n"""
 
-def pyprep(hexstr, dirpth, fname):    #given hex string, directory path, and output filename, it creates a py script and a folder with raw model
+def pyprep(inputstr, dirpth, fname, encode):    #given a string, directory path, and output filename, it creates a py script and a folder with raw model
     zoutfname = fname + '.zip'
     zoutputloc = os.path.join(dircheck(dirpth), zoutfname)
     zipdirname = fname + '_raw_model'
     zipextloc = os.path.join(dircheck(dirpth), zipdirname)
 
-    pymodelloc = os.path.join(dircheck(dirpth), fname + '.py')    
+    pymodelloc = os.path.join(dircheck(dirpth), fname + '.py')
     
-    hexcon(hexstr, zoutputloc, zipextloc)
+    decodestr(inputstr, zoutputloc, zipextloc, encode)
     codestitch(pymodelloc, zipextloc, fname)
     codeanalysis(pymodelloc, zipextloc)
 
@@ -34,31 +34,19 @@ def dircheck(loc):    #directory checking and creation
         os.makedirs(loc)
     return loc
 
-def b64con(b64str, outputloc, extloc):   #base64 version of hexcon
-    b64str_nnl = b64str.replace('\n','').replace('\r','')
-    f = open(outputloc, "wb")
-    decode = b64.b64decode(b64str_nnl)
-    f.write(decode)
+def decodestr(inputstr, outputloc, extloc, etype):    #takes a string in either hex or base64, creates zip file and extracts it
+    str_nnl = inputstr.replace('\n','').replace('\r','')
+    
+    if etype == 'base64':
+        decstr = b64.urlsafe_b64decode(str_nnl)
+    elif etype == 'hex':
+        decstr = bi.unhexlify(str_nnl)
+    else:
+        raise TypeError('String error: Cannot obtain format information from given link')
+        
+    f = open(outputloc, "wb")    
+    f.write(decstr)
     f.close()
-    
-    print "Zip file recovered"
-    
-    tarzip = zi.ZipFile(outputloc)
-    tarzip.extractall(extloc)
-    tarzip.close()
-    
-    print "Zip file decompressed, \n location = ", extloc
-
-    delseq(outputloc)
-
-    print "Zip file removed \n"
-    
-def hexcon(hex_str, outputloc, extloc):    #consverting hex string back to zip files (zip files are removed)
-    hexstr_nnl = hex_str.replace('\n','').replace('\r','')
-    f = open(outputloc, "wb")
-    f.write(bi.unhexlify(hexstr_nnl))
-    f.close()
-
     print "Zip file recovered"
     
     tarzip = zi.ZipFile(outputloc)
