@@ -16,13 +16,15 @@ def hello_world():
 
 @app.route('/redirect', methods=['GET', 'POST'])
 def make_redirect_ipython():
-    archive = request.args.get('archive')
-    ipythonify.pyprep(archive, dirname, 'a')
-    notebook = ipythonify.jsonify(os.path.join(dirname,'a.py'), 'a.ipynb')
-    with open(os.path.join(dirname,'a.ipynb'), "w") as notebook_file:
+    title = request.args.get('title', type = str)
+    encin = request.args.get('format', type = str)
+    archive = request.args.get('archive', type = str)
+    ipythonify.pyprep(archive, dirname, title, encin)
+    notebook = ipythonify.jsonify(os.path.join(dirname, title + '.py'), title)
+    with open(os.path.join(dirname, title + '.ipynb'), "w") as notebook_file:
         notebook_file.write(notebook)
 
-    return redirect('http://localhost:8888/notebooks/' + 'a.ipynb', code=302)
+    return redirect('http://localhost:8888/notebooks/' + title + '.ipynb', code=302)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
