@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect, render_template
 import ipythonify
 import os
 import sys
@@ -17,6 +17,13 @@ def hello_world():
 
 @app.route('/redirect', methods=['GET', 'POST'])
 def make_redirect_ipython():
+    return render_template('pickHost.html')
+
+
+@app.route('/open')
+def openAsNotebook():
+    # host = request.args.get('host')
+
     title = request.args.get('title', type=str)
     encin = request.args.get('format', type=str)
     archive = request.args.get('archive', type=str)
@@ -25,8 +32,9 @@ def make_redirect_ipython():
     with open(os.path.join(dirname, title + '.ipynb'), "w") as notebook_file:
         notebook_file.write(notebook)
 
-    return redirect('http://localhost:8888/notebooks/' +
+    return redirect('http://' + 'localhost:8888' + '/notebooks/' +
                     title + '.ipynb', code=302)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
