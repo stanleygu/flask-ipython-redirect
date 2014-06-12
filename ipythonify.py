@@ -24,7 +24,7 @@ def pyprep(inputstr, dirpth, fname, encode):    #given a string, directory path,
     zipextloc = os.path.join(dircheck(dirpth), zipdirname)
 
     pymodelloc = os.path.join(dircheck(dirpth), fname + '.py')
-    
+
     decodestr(inputstr, zoutputloc, zipextloc, encode)
     codestitch(pymodelloc, zipextloc, fname)
     codeanalysis(pymodelloc, zipextloc)
@@ -36,23 +36,23 @@ def dircheck(loc):    #directory checking and creation
 
 def decodestr(inputstr, outputloc, extloc, etype):    #takes a string in either hex or base64, creates zip file and extracts it
     str_nnl = inputstr.replace('\n','').replace('\r','')
-    
+
     if etype == 'base64':
         decstr = b64.urlsafe_b64decode(str_nnl)
     elif etype == 'hex':
         decstr = bi.unhexlify(str_nnl)
     else:
         raise TypeError('String error: Cannot obtain format information from given link')
-        
-    f = open(outputloc, "wb")    
+
+    f = open(outputloc, "wb")
     f.write(decstr)
     f.close()
     print "Zip file recovered"
-    
+
     tarzip = zi.ZipFile(outputloc)
     tarzip.extractall(extloc)
     tarzip.close()
-    
+
     print "Zip file decompressed, \n location = ", extloc
 
     delseq(outputloc)
@@ -82,13 +82,13 @@ def sbmlconv(zipextloc):    #sbml conversion into antimony str
     sbml = te.readFromFile(zipextloc + sbmlloc)
     sbmlantimony = te.sbmlToAntimony(sbml)
     return sbmlantimony
-    
+
 def sedmlconv(zipextloc):    #sedml conversion
     sbmlloc, sedmlloc = manifestsearch(zipextloc)
     sedml = se.sedml_to_python(zipextloc + sedmlloc)
     return sedml
-    
-def codestitch(pymodelloc, extloc, filename):    #creates a py script with both sbml and sedml included    
+
+def codestitch(pymodelloc, extloc, filename):    #creates a py script with both sbml and sedml included
     sbmlstr = sbmlconv(extloc)
     sedmlstr = sedmlconv(extloc)
     with open(pymodelloc, "w+") as filef:
@@ -99,7 +99,7 @@ def codestitch(pymodelloc, extloc, filename):    #creates a py script with both 
             filef.write("import tellurium as te\n\n")
         filef.write("model = '''\n" + sbmlstr + "'''\n" + sedmlstr)
         filef.close()
-        
+
 def codeanalysis(pymodelloc, extloc):    #included in case of sedml codes not compatible with single model file approach
     sbmlloc, sedmlloc = manifestsearch(extloc)
     for line in fi.input(pymodelloc,inplace = 1):
@@ -112,8 +112,8 @@ def codeanalysis(pymodelloc, extloc):    #included in case of sedml codes not co
 def jsonify(pyloc, fname):    #given the location of py script, outputs json string
     srcfile = open(pyloc, "r+")
     srcfile.seek(0)
-    srcread = srcfile.readlines(0)
-    modelcon = json.dumps(srcread)
+    srcread = srcfile.read().splitlines()
+    modelcon = json.dumps(['%matplotlib inline'] + srcread)
     temp = Template("""{
  "metadata": {
   "name": "$filetitle",
@@ -152,4 +152,4 @@ def delseq(floc):
 def exitseq():
     raw_input('Press enter to exit.')
     exit(0)
-    
+
