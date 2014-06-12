@@ -27,12 +27,13 @@ def openAsNotebook():
     title = request.args.get('title', type=str)
     encin = request.args.get('format', type=str)
     archive = request.args.get('archive', type=str)
+    host = request.args.get('host', type=str)
     ipythonify.pyprep(archive, dirname, title, encin)
     notebook = ipythonify.jsonify(os.path.join(dirname, title + '.py'), title)
     with open(os.path.join(dirname, title + '.ipynb'), "w") as notebook_file:
         notebook_file.write(notebook)
 
-    return redirect('http://' + 'localhost:8888' + '/notebooks/' +
+    return redirect('http://' + host + '/notebooks/' +
                     title + '.ipynb', code=302)
 
 
